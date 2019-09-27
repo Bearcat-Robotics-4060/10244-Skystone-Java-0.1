@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "/home/evan/Desktop/FTC/FTC Java 2019 - 2020 SkyStone/Testing_NO_GIT/Test_1/TeamCode/build/intermediates/incremental/mergeDebugResources/merged.dir/values-v11/values-v11.xml",
+            "map": [
+                {
+                    "source": "/home/evan/.gradle/caches/transforms-2/files-2.1/cfb3cb444e27fdf7e452e46e0ad35e31/res/values-v11/values-v11.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "4",
+                        "endColumns": "12",
+                        "endOffsets": "187"
+                    }
+                }
+            ]
+        }
+    ]
+}
