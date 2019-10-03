@@ -59,21 +59,24 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
 
     //Motors
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor left_mtr = null;
-    private DcMotor right_mtr = null;
-    private DcMotor arm_mtr = null;
-
+    private DcMotor leftDrive = null;
+    private DcMotor rightDrive = null;
+    private DcMotor liftMotor = null;
+    private DcMotor armMotor = null;
 
     //Servos
     //   private Servo colorArm = null;
-    private Servo arm_servo = null;
+    private Servo armMid = null;
+    private Servo clawHand = null;
+    private Servo baseArm = null;
 
     private Double LeftValue;
     private Double RightValue;
 
-  //  private float leftPos = left_mtr.getCurrentPosition();
-//    private float rightPos = right_mtr.getCurrentPosition();
-   // private float armPos = arm_mtr.getCurrentPosition();
+    private float leftPos = leftDrive.getCurrentPosition();
+    private float rightPos = rightDrive.getCurrentPosition();
+    private float armPos = armMotor.getCurrentPosition();
+    private float liftPos = liftMotor.getCurrentPosition();
 
 
     public void init() {
@@ -85,29 +88,36 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
         // step (using the FTC Robot Controller app on the phone).
 
         //Motors
-        left_mtr = hardwareMap.get(DcMotor.class, "left_mtr");
-        right_mtr = hardwareMap.get(DcMotor.class, "right_mtr");
-        arm_mtr = hardwareMap.get(DcMotor.class, "arm_mtr");
+        leftDrive = hardwareMap.get(DcMotor.class, "leftDrive");
+        rightDrive = hardwareMap.get(DcMotor.class, "rightDrive");
+        liftMotor = hardwareMap.get(DcMotor.class, "liftMotor");
+        armMotor = hardwareMap.get(DcMotor.class, "armMotor");
         //Servos
-        arm_servo = hardwareMap.get(Servo.class, "arm_servo");
+        armMid = hardwareMap.get(Servo.class, "armMid");
+        clawHand = hardwareMap.get(Servo.class, "clawHand");
+        baseArm = hardwareMap.get(Servo.class, "baseArm");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        left_mtr.setDirection(DcMotor.Direction.FORWARD);
-        right_mtr.setDirection(DcMotor.Direction.REVERSE);
-        arm_mtr.setDirection(DcMotor.Direction.FORWARD);
+        leftDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightDrive.setDirection(DcMotor.Direction.REVERSE);
+        liftMotor.setDirection(DcMotor.Direction.FORWARD);
+        armMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        left_mtr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        right_mtr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        arm_mtr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        left_mtr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_mtr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm_mtr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        left_mtr.setPower(0);
-        right_mtr.setPower(0);
-        arm_mtr.setPower(0);
+        leftDrive.setPower(0);
+        rightDrive.setPower(0);
+        armMotor.setPower(0);
+        liftMotor.setPower(0);
 
 
         // Wait for the game to start (driver presses PLAY)
@@ -130,18 +140,18 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
 
 
         if (gamepad2.left_stick_y < 0.1 || gamepad2.left_stick_y > -0.1) {
-           // liftMotor.setPower(gamepad2.left_stick_y);
+            liftMotor.setPower(gamepad2.left_stick_y);
         }
 
         else if (!gamepad2.dpad_down || !gamepad2.dpad_up) {
-            //liftMotor.setPower(0);
+            liftMotor.setPower(0);
         }
         if (gamepad2.left_bumper) {
-            arm_mtr.setPower(-0.5);
+            armMotor.setPower(-0.5);
         } else if (gamepad2.right_bumper) {
-            arm_mtr.setPower(1);
+            armMotor.setPower(1);
         } else if (!gamepad2.left_bumper || !gamepad2.right_bumper) {
-            arm_mtr.setPower(0.0);
+            armMotor.setPower(0.0);
         }
 
 
@@ -152,35 +162,39 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
 
         if (gamepad2.x) {
 
-            //clawHand.setPosition(0);
+            clawHand.setPosition(0);
 
         } else if (gamepad2.y) {
-            //clawHand.setPosition(1.0);
+            clawHand.setPosition(1.0);
         } else if (gamepad2.a) {
-            arm_servo.setPosition(0);
+            armMid.setPosition(0);
         } else if (gamepad2.b) {
-            arm_servo.setPosition(1);
+            armMid.setPosition(1);
         }
 
         // Send calculated power to wheels
-        left_mtr.setPower(leftPower);
-        right_mtr.setPower(rightPower);
+        leftDrive.setPower(leftPower);
+        rightDrive.setPower(rightPower);
 
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-      //  telemetry.addData("Left POS", "(%.2f)", leftPos);
-       // telemetry.addData("Right POS", "(%.2f)", rightPos);
-       // telemetry.addData("Arm  POS", "(%.2f)", armPos);
+        telemetry.addData("Left POS", "(%.2f)", leftPos);
+        telemetry.addData("Right POS", "(%.2f)", rightPos);
+        telemetry.addData("Lift POS", "(%.2f)", liftPos);
+        telemetry.addData("Arm  POS", "(%.2f)", armPos);
 
         telemetry.update();
     }
 
         public void stop() {
-            left_mtr.setPower(0);
-            right_mtr.setPower(0);
-            arm_mtr.setPower(0);
-            arm_servo.setPosition(0.5);
-            }
+            leftDrive.setPower(0);
+            rightDrive.setPower(0);
+            liftMotor.setPower(0);
+            armMotor.setPower(0);
+            armMid.setPosition(0.5);
+            clawHand.setPosition(0.5);
+            baseArm.setPosition(0.5);
+        }
 }
