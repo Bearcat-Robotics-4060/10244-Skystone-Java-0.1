@@ -55,10 +55,7 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
     //   private Servo colorArm = null;
     private Servo claw_1 = null;
     private Servo claw_2 = null;
-    private Double LeftValue;
-    private Double RightValue;
-    private Double armPower;
-
+    
     // private float leftPos = left_mtr.getCurrentPosition();
     // private float rightPos = right_mtr.getCurrentPosition();
     // private float armPos = arm_mtr.getCurrentPosition();
@@ -104,24 +101,28 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
     }
 
 
-    // run until the end of the match (driver presses STOP)
+    // The driving code (Autonomous To be!)
     public void loop() {
 
-        // Setup a variable for each drive wheel to save power level for telemetry
+        // Initialize Variables for storing the calculated motor power.
         double leftPower;
         double rightPower;
         double armPower = 0;
 
-        //Motors
-        double drive = gamepad1.left_stick_y;
-        double turn = -gamepad1.right_stick_x;
-//        leftPower = Range.clip(drive + turn, -1, 1);
-  //      rightPower = Range.clip(drive - turn, -1, 1);
+        //Motor mapping to sticks
 
-        leftPower = drive - turn;
-        rightPower = drive + turn;
+        double drive_frd_bck = gamepad1.left_stick_y;
+        double turn_left_right = -gamepad1.right_stick_x;
+        //Original Clunky Driving Code
+  //      leftPower = Range.clip(drive_frd_bck + turn_left_right, -1, 1);
+  //      rightPower = Range.clip(drive_frd_bck - turn_left_right, -1, 1);
 
-        //To control the arm, with DPad controls.
+
+        //New Driving Code For Testing
+        leftPower = drive_frd_bck - turn_left_right;
+        rightPower = drive_frd_bck + turn_left_right;
+
+        //To control the arm with DPad controls.
 
         if (gamepad1.dpad_up) {
            armPower = (0.5);
@@ -129,9 +130,6 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
         else if (gamepad1.dpad_down) {
             armPower = (-0.5);
         }
-        //Servos
-        LeftValue = 0.0;
-        RightValue = 0.0;
 
         //To control the claw with X and Y
         if (gamepad1.x) {
@@ -145,11 +143,6 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
             claw_2.setPosition(1);
 
         }
-//        } else if (gamepad2.a) {
-//            arm_servo.setPosition(0);
-//        } else if (gamepad2.b) {
-//            arm_servo.setPosition(1);
-//        }
 
         // Send calculated power to wheels
         left_mtr.setPower(leftPower);
@@ -163,16 +156,10 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
         telemetry.addData("ArmMotorPower", "%.2f", armPower);
         telemetry.addData("Claw_1 PoS", "%.2f", claw_1.getPosition());
         telemetry.addData("Claw_2 PoS", "%.2f", claw_2.getPosition());
-
-
-        //telemetry.addData("Left POS", "%.2f", leftPower);
-      //  telemetry.addData("Left POS", "(%.2f)", leftPos);
-       // telemetry.addData("Right POS", "(%.2f)", rightPos);
-       // telemetry.addData("Arm  POS", "(%.2f)", armPos);
-
+//Send Telementry Data To The Phone
         telemetry.update();
     }
-
+//Function called when stop button is pressed on the phone.
         public void stop() {
             left_mtr.setPower(0);
             right_mtr.setPower(0);
