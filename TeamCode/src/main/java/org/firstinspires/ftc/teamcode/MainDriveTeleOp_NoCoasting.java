@@ -37,20 +37,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 
-/**
- * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
- * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
- * of the FTC Driver Station. When an selection is made from the menu, the corresponding OpMode
- * class is instantiated on the Robot Controller and executed.
- *
- * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
- * It includes all the skeletal structure that all linear OpModes contain.
- *
- * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
-
-@TeleOp(name="Two Person Drive NOOASTING", group="Main")
+@TeleOp(name="One Person Drive", group="Main")
 
 public class MainDriveTeleOp_NoCoasting extends OpMode {
 
@@ -66,14 +53,15 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
 
     //Servos
     //   private Servo colorArm = null;
-    private Servo arm_servo = null;
-
+    private Servo claw_1 = null;
+    private Servo claw_2 = null;
     private Double LeftValue;
     private Double RightValue;
+    private Double armPower;
 
-  //  private float leftPos = left_mtr.getCurrentPosition();
-//    private float rightPos = right_mtr.getCurrentPosition();
-   // private float armPos = arm_mtr.getCurrentPosition();
+    // private float leftPos = left_mtr.getCurrentPosition();
+    // private float rightPos = right_mtr.getCurrentPosition();
+    // private float armPos = arm_mtr.getCurrentPosition();
 
 
     public void init() {
@@ -89,7 +77,8 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
         right_mtr = hardwareMap.get(DcMotor.class, "right_mtr");
         arm_mtr = hardwareMap.get(DcMotor.class, "arm_mtr");
         //Servos
-        arm_servo = hardwareMap.get(Servo.class, "arm_servo");
+        claw_1 = hardwareMap.get(Servo.class, "claw_1");
+        claw_2 = hardwareMap.get(Servo.class, "claw_2");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -121,55 +110,62 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
         // Setup a variable for each drive wheel to save power level for telemetry
         double leftPower;
         double rightPower;
+        double armPower = 0;
 
         //Motors
         double drive = gamepad1.left_stick_y;
         double turn = -gamepad1.right_stick_x;
-        leftPower = Range.clip(drive + turn, -1, 1);
-        rightPower = Range.clip(drive - turn, -1, 1);
+//        leftPower = Range.clip(drive + turn, -1, 1);
+  //      rightPower = Range.clip(drive - turn, -1, 1);
 
+        leftPower = drive - turn;
+        rightPower = drive + turn;
 
-        if (gamepad2.left_stick_y < 0.1 || gamepad2.left_stick_y > -0.1) {
-           // liftMotor.setPower(gamepad2.left_stick_y);
+        //To control the arm, with DPad controls.
+
+        if (gamepad1.dpad_up) {
+           armPower = (0.5);
         }
-
-        else if (!gamepad2.dpad_down || !gamepad2.dpad_up) {
-            //liftMotor.setPower(0);
+        else if (gamepad1.dpad_down) {
+            armPower = (-0.5);
         }
-        if (gamepad2.left_bumper) {
-            arm_mtr.setPower(-0.5);
-        } else if (gamepad2.right_bumper) {
-            arm_mtr.setPower(1);
-        } else if (!gamepad2.left_bumper || !gamepad2.right_bumper) {
-            arm_mtr.setPower(0.0);
-        }
-
-
         //Servos
         LeftValue = 0.0;
         RightValue = 0.0;
 
+        //To control the claw with X and Y
+        if (gamepad1.x) {
 
-        if (gamepad2.x) {
+            claw_1.setPosition(1);
+            claw_2.setPosition(0);
 
-            //clawHand.setPosition(0);
+        } else if (gamepad1.y) {
 
-        } else if (gamepad2.y) {
-            //clawHand.setPosition(1.0);
-        } else if (gamepad2.a) {
-            arm_servo.setPosition(0);
-        } else if (gamepad2.b) {
-            arm_servo.setPosition(1);
+            claw_1.setPosition(0);
+            claw_2.setPosition(1);
+
         }
+//        } else if (gamepad2.a) {
+//            arm_servo.setPosition(0);
+//        } else if (gamepad2.b) {
+//            arm_servo.setPosition(1);
+//        }
 
         // Send calculated power to wheels
         left_mtr.setPower(leftPower);
         right_mtr.setPower(rightPower);
+        arm_mtr.setPower(armPower);
 
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+        telemetry.addData("ArmMotorPower", "%.2f", armPower);
+        telemetry.addData("Claw_1 PoS", "%.2f", claw_1.getPosition());
+        telemetry.addData("Claw_2 PoS", "%.2f", claw_2.getPosition());
+
+
+        //telemetry.addData("Left POS", "%.2f", leftPower);
       //  telemetry.addData("Left POS", "(%.2f)", leftPos);
        // telemetry.addData("Right POS", "(%.2f)", rightPos);
        // telemetry.addData("Arm  POS", "(%.2f)", armPos);
@@ -181,6 +177,5 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
             left_mtr.setPower(0);
             right_mtr.setPower(0);
             arm_mtr.setPower(0);
-            arm_servo.setPosition(0.5);
             }
 }
