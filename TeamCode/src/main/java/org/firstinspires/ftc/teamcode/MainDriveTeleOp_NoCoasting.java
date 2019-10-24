@@ -119,9 +119,9 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
 
 
         //New Driving Code For Testing
-        leftPower = drive_frd_bck - turn_left_right;
-        rightPower = drive_frd_bck + turn_left_right;
 
+        leftPower = drive_frd_bck + turn_left_right;
+        rightPower = drive_frd_bck - turn_left_right;
         //To control the arm with DPad controls.
 
         if (gamepad1.dpad_up) {
