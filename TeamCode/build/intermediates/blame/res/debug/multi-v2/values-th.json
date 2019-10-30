@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "C:\\Users\\Jibo1\\Desktop\\FTC\\Manged_Repos_Git\\10244-Skystone-Java-0.1\\TeamCode\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-th\\values-th.xml",
+            "outputFile": "/home/evan/Desktop/FTC Java/Managed Git/10244-Skystone-Java-0.1/TeamCode/build/intermediates/incremental/mergeDebugResources/merged.dir/values-th/values-th.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Jibo1\\.gradle\\caches\\transforms-2\\files-2.1\\050e6972469873b9a4c4db2ed3bfe9ea\\res\\values-th\\values-th.xml",
+                    "source": "/home/evan/.gradle/caches/transforms-2/files-2.1/55cf53de9924cdb6fc854a54df6061d6/res/values-th/values-th.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

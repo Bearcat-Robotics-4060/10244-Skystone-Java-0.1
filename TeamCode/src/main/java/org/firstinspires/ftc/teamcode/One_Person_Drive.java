@@ -34,12 +34,13 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
+
+import java.util.Timer;
 
 
 @TeleOp(name="One Person Drive", group="Main")
 
-public class MainDriveTeleOp_NoCoasting extends OpMode {
+public class One_Person_Drive extends OpMode {
 
     // Declare OpMode members.
 
@@ -48,17 +49,20 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor left_mtr = null;
     private DcMotor right_mtr = null;
-    private DcMotor arm_mtr = null;
+    private DcMotor r_lift = null;
+    private DcMotor l_lift = null;
+    private DcMotor intake_mtr = null;
+
 
 
     //Servos
     //   private Servo colorArm = null;
     private Servo claw_1 = null;
     private Servo claw_2 = null;
-    
+
     // private float leftPos = left_mtr.getCurrentPosition();
     // private float rightPos = right_mtr.getCurrentPosition();
-    // private float armPos = arm_mtr.getCurrentPosition();
+    // private float armPos = r_lift.getCurrentPosition();
 
 
     public void init() {
@@ -72,28 +76,23 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
         //Motors
         left_mtr = hardwareMap.get(DcMotor.class, "left_mtr");
         right_mtr = hardwareMap.get(DcMotor.class, "right_mtr");
-        arm_mtr = hardwareMap.get(DcMotor.class, "arm_mtr");
+        r_lift = hardwareMap.get(DcMotor.class, "r_lift");
+        l_lift = hardwareMap.get(DcMotor.class, "l_lift");
+        intake_mtr = hardwareMap.get(DcMotor.class, "intake_mtr");
         //Servos
         claw_1 = hardwareMap.get(Servo.class, "claw_1");
         claw_2 = hardwareMap.get(Servo.class, "claw_2");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        left_mtr.setDirection(DcMotor.Direction.FORWARD);
-        right_mtr.setDirection(DcMotor.Direction.REVERSE);
-        arm_mtr.setDirection(DcMotor.Direction.FORWARD);
+                motor_init(left_mtr, true);
+                motor_init(right_mtr, false);
+                motor_init(r_lift, true);
+                motor_init(l_lift, true);
+                motor_init(intake_mtr, true);
 
-        left_mtr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        right_mtr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        arm_mtr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        left_mtr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_mtr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm_mtr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        left_mtr.setPower(0);
-        right_mtr.setPower(0);
-        arm_mtr.setPower(0);
 
 
         // Wait for the game to start (driver presses PLAY)
@@ -107,29 +106,43 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
         // Initialize Variables for storing the calculated motor power.
         double leftPower;
         double rightPower;
-        double armPower = 0;
 
         //Motor mapping to sticks
+        //Doing the math for our smooth drive
+        /*
+        Here's an idea, get x and y, left motor = x - y, right motor = x + y
+         There is no reason this shouldn't work smoothly.
+         */
+        leftPower = gamepad1.left_stick_x - gamepad1.left_stick_y;
+            rightPower = gamepad1.left_stick_x + gamepad1.left_stick_y;
 
-        double drive_frd_bck = gamepad1.left_stick_y;
-        double turn_left_right = -gamepad1.right_stick_x;
-        //Original Clunky Driving Code
-  //      leftPower = Range.clip(drive_frd_bck + turn_left_right, -1, 1);
-  //      rightPower = Range.clip(drive_frd_bck - turn_left_right, -1, 1);
+        if (gamepad1.dpad_left) {
+            l_lift.setPower(-0.5);
+            r_lift.setPower(-0.5);
+        }
+        else if (gamepad1.dpad_right) {
+            l_lift.setPower(0.5);
+            r_lift.setPower(0.5);
+        }
+        else {
+            l_lift.setPower(0);
+            r_lift.setPower(0);
+        }
 
 
-        //New Driving Code For Testing
-
-        leftPower = drive_frd_bck + turn_left_right;
-        rightPower = drive_frd_bck - turn_left_right;
         //To control the arm with DPad controls.
 
         if (gamepad1.dpad_up) {
-           armPower = (0.5);
+            intake_mtr.setPower(0.5);
         }
         else if (gamepad1.dpad_down) {
-            armPower = (-0.5);
+            intake_mtr.setPower(-0.5);
         }
+        else {
+            intake_mtr.setPower(0);
+
+        }
+
 
         //To control the claw with X and Y
         if (gamepad1.x) {
@@ -147,22 +160,54 @@ public class MainDriveTeleOp_NoCoasting extends OpMode {
         // Send calculated power to wheels
         left_mtr.setPower(leftPower);
         right_mtr.setPower(rightPower);
-        arm_mtr.setPower(armPower);
+
 
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-        telemetry.addData("ArmMotorPower", "%.2f", armPower);
+        telemetry.addData("Left, Right Lift Power", "left (%.2f), right (%.2f)", l_lift.getPower(), r_lift.getPower());
         telemetry.addData("Claw_1 PoS", "%.2f", claw_1.getPosition());
         telemetry.addData("Claw_2 PoS", "%.2f", claw_2.getPosition());
 //Send Telementry Data To The Phone
         telemetry.update();
     }
-//Function called when stop button is pressed on the phone.
-        public void stop() {
-            left_mtr.setPower(0);
-            right_mtr.setPower(0);
-            arm_mtr.setPower(0);
-            }
+    //Function called when stop button is pressed on the phone.
+    public void stop() {
+        left_mtr.setPower(0);
+        right_mtr.setPower(0);
+        r_lift.setPower(0);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        public void motor_init (DcMotor mtr_, boolean _dir){
+
+
+        if (_dir == true) {
+            mtr_.setDirection(DcMotor.Direction.FORWARD);
+        } else {
+            mtr_.setDirection(DcMotor.Direction.REVERSE);
+        }
+        mtr_.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        mtr_.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        mtr_.setPower(0);
+
+    }
+
+
+
+
 }
