@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.main_funcs;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.teleop.One_Person_Drive;
 
@@ -14,11 +15,26 @@ public class driving_mtrs {
 
     //This class with deal with the control of motors, including defining them.
 
+        //Define Motor Vars + Elapsed Time
+        //Motors
+        public ElapsedTime runtime = new ElapsedTime();
+    public DcMotor left_mtr = null;
+    public DcMotor right_mtr = null;
+    public DcMotor r_lift = null;
+    public DcMotor l_lift = null;
+    public DcMotor intake_mtr = null;
 
-    //Defining motors.
-    public void map_motors() {
+    public void defineMotors(){
+
+
+        misc_func.motor_init(left_mtr, true);
+        misc_func.motor_init(right_mtr, false);
+        misc_func.motor_init(r_lift, true);
+        misc_func.motor_init(l_lift, true);
+        misc_func.motor_init(intake_mtr, true);
 
     }
+
 
 
     public void setSpecificMotor(DcMotor motorSpec, double power, int time) {
@@ -27,16 +43,36 @@ public class driving_mtrs {
     }
 
     public void liftArm(double power) {
-        one_person_drive.l_lift.setPower(power);
-        one_person_drive.r_lift.setPower(power);
+        l_lift.setPower(power);
+        r_lift.setPower(power);
     }
 
     public void intakeMotor(double power) {
-        one_person_drive.intake_mtr.setPower(power);
+        intake_mtr.setPower(power);
     }
 
     public void sendMtrData() {
-        one_person_drive.left_mtr.setPower(calc_drive.leftPower);
-        one_person_drive.right_mtr.setPower(calc_drive.rightPower);
+        left_mtr.setPower(calc_drive.leftPower);
+        right_mtr.setPower(calc_drive.rightPower);
+    }
+
+    public void teleop_input() {
+        if (one_person_drive.gamepad1.dpad_up) {
+            intakeMotor(0.5);
+        } else if (one_person_drive.gamepad1.dpad_down) {
+            intakeMotor(-0.5);
+        } else {
+            intakeMotor(0);
+
+        }
+
+        if (one_person_drive.gamepad1.dpad_left) {
+            liftArm(-0.5);
+        } else if (one_person_drive.gamepad1.dpad_right) {
+            liftArm(0.5);
+        } else {
+            liftArm(0);
+        }
+
     }
 }
