@@ -35,7 +35,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.main_funcs.calc_drive;
+import org.firstinspires.ftc.teamcode.main_funcs.driving_mtrs;
 import org.firstinspires.ftc.teamcode.main_funcs.misc_func;
+import org.firstinspires.ftc.teamcode.main_funcs.sendTelementery;
 
 
 @TeleOp(name="One Person Drive", group="Main")
@@ -43,26 +46,31 @@ import org.firstinspires.ftc.teamcode.main_funcs.misc_func;
 public class One_Person_Drive extends OpMode {
 //Set class and method for permenant use.
 
+
+
     // Declare OpMode members.
 
 
     //Declare Function Calls
     misc_func oth_func = new misc_func();
+    driving_mtrs drive = new driving_mtrs();
+    calc_drive  calc_drive = new calc_drive();
+    sendTelementery sendTelementery = new sendTelementery();
 
 
 
     //Motors
-    private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor left_mtr = null;
-    private DcMotor right_mtr = null;
-    private DcMotor r_lift = null;
-    private DcMotor l_lift = null;
-    private DcMotor intake_mtr = null;
+    public ElapsedTime runtime = new ElapsedTime();
+    public DcMotor left_mtr = null;
+    public DcMotor right_mtr = null;
+    public DcMotor r_lift = null;
+    public DcMotor l_lift = null;
+    public DcMotor intake_mtr = null;
 
 
     //Servos
-    private Servo claw_1 = null;
-    private Servo claw_2 = null;
+    public Servo claw_1 = null;
+    public Servo claw_2 = null;
 
     public void init() {
         telemetry.addData("Status", "Initialized");
@@ -73,11 +81,7 @@ public class One_Person_Drive extends OpMode {
         // step (using the FTC Robot Controller app on the phone).
 
         //Motors mapping to hardware
-        left_mtr = hardwareMap.get(DcMotor.class, "left_mtr");
-        right_mtr = hardwareMap.get(DcMotor.class, "right_mtr");
-        r_lift = hardwareMap.get(DcMotor.class, "r_lift");
-        l_lift = hardwareMap.get(DcMotor.class, "l_lift");
-        intake_mtr = hardwareMap.get(DcMotor.class, "intake_mtr");
+
         //Servos
         claw_1 = hardwareMap.get(Servo.class, "claw_1");
         claw_2 = hardwareMap.get(Servo.class, "claw_2");
@@ -100,28 +104,16 @@ public class One_Person_Drive extends OpMode {
     // The driving code
     public void loop() {
 
-        // Initialize Variables for storing the calculated motor power.
-        double leftPower;
-        double rightPower;
+        //Call driving motors method
+        calc_drive.drive_caclulate();
 
-        //Motor mapping to sticks
-        //Doing the math for our smooth drive
-        /*
-        Here's an idea, get x and y, left motor = x - y, right motor = x + y
-         There is no reason this shouldn't work smoothly.
-         */
-        leftPower = gamepad1.left_stick_x - gamepad1.left_stick_y;
-        rightPower = gamepad1.left_stick_x + gamepad1.left_stick_y;
 
         if (gamepad1.dpad_left) {
-            l_lift.setPower(-0.5);
-            r_lift.setPower(-0.5);
+            drive.liftArm(-0.5);
         } else if (gamepad1.dpad_right) {
-            l_lift.setPower(0.5);
-            r_lift.setPower(0.5);
+            drive.liftArm(0.5);
         } else {
-            l_lift.setPower(0);
-            r_lift.setPower(0);
+            drive.liftArm(0);
         }
 
 
@@ -150,31 +142,10 @@ public class One_Person_Drive extends OpMode {
 
         }
 
-        // Send calculated power to wheels
-        left_mtr.setPower(leftPower);
-        right_mtr.setPower(rightPower);
-
 
         // Show the elapsed game time and wheel power.
-        telemetry.addData("Status", "Run Time: " + runtime.toString());
-        telemetry.addData("Joysticks", "left_x (%.2f), left_y (%.2f)", gamepad1.left_stick_x, gamepad1.left_stick_y);
-        telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-        telemetry.addData("Left, Right Lift Power", "left (%.2f), right (%.2f)", l_lift.getPower(), r_lift.getPower());
-        telemetry.addData("Claw_1 PoS", "%.2f", claw_1.getPosition());
-        telemetry.addData("Claw_2 PoS", "%.2f", claw_2.getPosition());
-//Send Telementry Data To The Phone
-        telemetry.update();
+        sendTelementery.sendData();
     }
-
-
-    //Function called when stop button is pressed on the phone.
-    public void stop() {
-        left_mtr.setPower(0);
-        right_mtr.setPower(0);
-        r_lift.setPower(0);
-    }
-
-
 }
 
 
