@@ -31,58 +31,77 @@ package org.firstinspires.ftc.teamcode.teleop;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.main_funcs.calc_drive;
-import org.firstinspires.ftc.teamcode.main_funcs.driving_mtrs;
-import org.firstinspires.ftc.teamcode.main_funcs.misc_func;
-import org.firstinspires.ftc.teamcode.main_funcs.sendTelementery;
-import org.firstinspires.ftc.teamcode.main_funcs.servos_all;
+import org.firstinspires.ftc.teamcode.Definitions;
+import org.firstinspires.ftc.teamcode.Drive_Funcs.Drive_Calculate;
+import org.firstinspires.ftc.teamcode.motor_funcs.SendMtrData;
+import org.firstinspires.ftc.teamcode.motor_funcs.SetMotorDefinitions;
+import org.firstinspires.ftc.teamcode.servos.Init_Servos;
+import org.firstinspires.ftc.teamcode.telementry_data.SendTelementry;
+import org.firstinspires.ftc.teamcode.teleop.main_.Teleop_input;
 
 
 @TeleOp(name="One Person Drive", group="Main")
 
     public class One_Person_Drive extends OpMode {
-    //Set class and method for permenant use.
+
 
     //Declare Function Calls
-        misc_func misc_func = new misc_func();
-        driving_mtrs drive = new driving_mtrs();
-        calc_drive  calc_drive = new calc_drive();
-        sendTelementery sendTelementery = new sendTelementery();
-        servos_all servos_all = new servos_all();
+    Drive_Calculate drive_caclulate = new Drive_Calculate();
+    Definitions definitions = new Definitions();
+    SendMtrData sendMtrData = new SendMtrData();
+    SetMotorDefinitions setMotorDefinitions = new SetMotorDefinitions();
+    Teleop_input teleop_input = new Teleop_input();
+    SendTelementry sendTelementry = new SendTelementry();
+    Init_Servos init_servos = new Init_Servos();
 
 
+    //Opmode Specific Variables for configuration
+//False is gamepad 1, while True is gamepad 2
+
+    boolean drivePad = false;
+    boolean lifter = true;
+    boolean suction = true;
+    boolean servos = true;
 
 
+    public void init() {
 
-        public void init() {
-            telemetry.addData("Status", "Initialized");
-            telemetry.update();
-            //Functions To Initialize Robot
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
+        //Functions To Initialize Robot
+            setMotorDefinitions.hardwareMapBind();
+          setMotorDefinitions.defineMotors();
+          init_servos.init_servos();
 
-            drive.defineMotors();
+          //Below Code is for moving which parts need to be moved during Initialization;
+
+
 
 
 
 
             // Wait for the game to start (driver presses PLAY)
-            drive.runtime.reset();
+        definitions.runtime.reset();
         }
 
 
 
             public void loop() {
+                //Run the inputs
+                teleop_input.teleop_input(true);
 
-                //Call driving motors method
-                calc_drive.drive_caclulate();
-                drive.teleop_input();
-                servos_all.teleop_input();
-                drive.sendMtrData();
+                //Calculate the motor inputs:
+               drive_caclulate.drive_caclulate();
 
+               //Send the data to the motors;
+               sendMtrData.sendMtrData();
 
                 // Show the elapsed game time and wheel power.
-                sendTelementery.sendregData();
+                sendTelementry.sendTelementery();
+
             }
 }
 
